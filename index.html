@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scales Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9ff;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px;
+      margin: 0;
+    }
+    .calculator {
+      background-color: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    h1 {
+      text-align: center;
+      color: #5a189a;
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 8px;
+      border: 2px solid #cdb4db;
+      border-radius: 8px;
+      background-color: #f3f0ff;
+      color: #333;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(to right, #a663cc, #6a4c93);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: linear-gradient(to right, #6a4c93, #a663cc);
+    }
+    #result {
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #e0bbff;
+      color: #222;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+    #history {
+      margin-top: 30px;
+      padding: 12px;
+      background-color: #f8edff;
+      border: 1px solid #d8b4e2;
+      border-radius: 8px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    #history h2 {
+      margin-top: 0;
+      color: #6a4c93;
+      font-size: 18px;
+    }
+    .history-entry {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h1>Scales Calculator</h1>
+    <div class="input-group">
+      <label for="drawingLength">Drawing Length:</label>
+      <input type="text" id="drawingLength" placeholder="e.g., 10"/>
+    </div>
+    <div class="input-group">
+      <label for="drawingUnit">Unit of Drawing Length:</label>
+      <select id="drawingUnit">
+        <option value="" selected>Select Unit</option>
+        <option value="cm">cm</option>
+        <option value="dm">dm</option>
+        <option value="m">m</option>
+        <option value="dam">dam</option>
+        <option value="hm">hm</option>
+        <option value="km">km</option>
+        <option value="yard">yard</option>
+        <option value="feet">feet</option>
+        <option value="inch">inch</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label for="actualLength">Actual Length:</label>
+      <input type="text" id="actualLength" placeholder="e.g., 100"/>
+    </div>
+    <div class="input-group">
+      <label for="actualUnit">Unit of Actual Length:</label>
+      <select id="actualUnit">
+        <option value="" selected>Select Unit</option>
+        <option value="cm">cm</option>
+        <option value="dm">dm</option>
+        <option value="m">m</option>
+        <option value="dam">dam</option>
+        <option value="hm">hm</option>
+        <option value="km">km</option>
+        <option value="yard">yard</option>
+        <option value="feet">feet</option>
+        <option value="inch">inch</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label for="lmax">Maximum Length (Lmax):</label>
+      <input type="text" id="lmax" placeholder="e.g., 10"/>
+    </div>
+    <div class="input-group">
+      <label for="lmaxUnit">Unit of Lmax:</label>
+      <select id="lmaxUnit">
+        <option value="" selected>Select Unit</option>
+        <option value="cm">cm</option>
+        <option value="dm">dm</option>
+        <option value="m">m</option>
+        <option value="dam">dam</option>
+        <option value="hm">hm</option>
+        <option value="km">km</option>
+        <option value="yard">yard</option>
+        <option value="feet">feet</option>
+        <option value="inch">inch</option>
+      </select>
+    </div>
+    <button onclick="calculateScale()">Calculate</button>
+    <div id="result"></div>
+    <div id="history">
+      <h2>Calculation History</h2>
+      <div id="historyContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const conversionFactors = {
+      cm: 0.01, dm: 0.1, m: 1, dam: 10, hm: 100, km: 1000,
+      yard: 0.9144, feet: 0.3048, inch: 0.0254
+    };
+
+    let historyList = [];
+
+    function convertToMeters(value, unit) {
+      return parseFloat(value) * (conversionFactors[unit] || 0);
+    }
+
+    function calculateScale() {
+      const drawingLength = document.getElementById('drawingLength').value;
+      const drawingUnit = document.getElementById('drawingUnit').value;
+      const actualLength = document.getElementById('actualLength').value;
+      const actualUnit = document.getElementById('actualUnit').value;
+      const lmax = document.getElementById('lmax').value;
+      const lmaxUnit = document.getElementById('lmaxUnit').value;
+      const resultDiv = document.getElementById('result');
+
+      if (!drawingLength || !actualLength || !lmax || !drawingUnit || !actualUnit || !lmaxUnit) {
+        resultDiv.textContent = "Error: All fields and units are required.";
+        return;
+      }
+
+      const drawMeters = convertToMeters(drawingLength, drawingUnit);
+      const actMeters = convertToMeters(actualLength, actualUnit);
+      const lmaxMeters = convertToMeters(lmax, lmaxUnit);
+
+      if (actMeters === 0) {
+        resultDiv.textContent = "Error: Actual length cannot be zero.";
+        return;
+      }
+
+      const scale = drawMeters / actMeters;
+      const scaleRatio = scale > 0 ? `1:${Math.round(1 / scale)}` : "Invalid scale";
+      const ls_cm = scale * lmaxMeters * 100;
+
+      let warning = "";
+      if (drawMeters > lmaxMeters) {
+        warning = "Warning: Drawing length exceeds maximum length (Lmax)!\n";
+      }
+
+      const result = `${warning}Scale: ${scaleRatio}\n` +
+                     `Drawing Length (in cm): ${(drawMeters * 100).toFixed(2)}\n` +
+                     `Actual Length (in cm): ${(actMeters * 100).toFixed(2)}\n` +
+                     `Maximum Length (Lmax in ${lmaxUnit}): ${parseFloat(lmax).toFixed(2)} ${lmaxUnit}\n` +
+                     `Length of Scale (LS in cm): ${ls_cm.toFixed(2)}`;
+
+      resultDiv.textContent = result;
+      historyList.unshift(result);
+      updateHistory();
+    }
+
+    function updateHistory() {
+      const historyContent = document.getElementById("historyContent");
+      historyContent.innerHTML = historyList.map(entry => `<div class="history-entry">${entry}</div>`).join("");
+    }
+  </script>
+</body>
+</html>
